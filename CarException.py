@@ -26,6 +26,12 @@ class InvalidBodyTypeError(CarValidationError):
         self.message = message
         super().__init__(self.message)
 
+class InvalidModelError(CarValidationError):
+    def __init__(self, model, message):
+        self.model = model
+        self.message = message
+        super().__init__(self.message)
+
 class InvalidBrandError(CarValidationError):
     def __init__(self, brand, message):
         self.brand = brand
