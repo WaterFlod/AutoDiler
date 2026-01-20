@@ -1,4 +1,5 @@
 from Car import Car
+from CarException import CarValidationError
 
 import json
 import os
@@ -10,30 +11,132 @@ class AutoDealer:
     
     def __init__(self, filename: str = "cars_database.json"):
         self.filename = filename
+        self.cars: List[Car] = []
         self.body_types = set()
         self.brands = set()
-    
-    def save_to_file(self):
-        """Сохранение базы автомобилей в файл"""
-        data = [car.to_dict() for car in self.cars]
-        with open(self.filename, 'w', encoding='utf-8') as f:
+
+    def add_car(self, brand: str, model: str, year: int, body_type: str, mileage: int, price: int):
+        try:
+            car = Car(
+                brand, 
+                model, 
+                year, 
+                body_type, 
+                mileage, 
+                price
+                )
+            Car.up_count()
+            self.cars.append(car)
+            return car
+        except CarValidationError as e:
+            raise e
+        except Exception as e:
+            raise e
+        
+    def delete_car_with_id(self, id: int):
+        flag = False
+        
+        car = self.find_car(id)
+        if car:
+            self.cars.remove(car)
+            Car.down_count
+            flag = True
+        
+        return flag
+
+    def update_car(self, id: int, 
+                   brand: str = None, 
+                   model: str = None,
+                   year: int = None,
+                   body_type: str = None,
+                   mileage: int = None,
+                   price: int = None
+                   ):
+        flag = False
+
+        car = self.find_car(id)
+
+        if car:
+            ind = self.cars.index(car)
+
+            if brand:
+                car.brand = brand
+            elif model:
+                car.model = model
+            elif year:
+                car.year = year
+            elif body_type:
+                car.body_type = body_type
+            elif mileage:
+                car.mileage = mileage
+            elif price:
+                car.price = price
+            else:
+                return flag
+            
+            self.cars[ind] = car
+            flag = True
+
+        return flag
+
+    def find_car(self, id: int):
+        search_car = None
+
+        for car in self.cars:
+            if car.id == id:
+                search_car = car
+        
+        return search_car
+
+    def save_to_file(self, filename = None, report = None):
+        """Сохранение базы и отчётов автомобилей в файл"""
+        if report:
+            data = [car.to_dict() for car in report]
+        else:    
+            data = [car.to_dict() for car in self.cars]
+        if not(filename):
+            filename = self.filename
+        with open(filename, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        print(f"База данных сохранена в файл: {self.filename}")
+        print(f"База данных сохранена в файл: {filename}")
     
-    def load_from_file(self):
+    def load_from_file(self, filename = None):
         """Загрузка базы автомобилей из файла"""
-        self.cars: List[Car] = []
-        if os.path.exists(self.filename):
+        if not(filename):
+            filename = self.filename
+
+        if os.path.exists(filename):
             try:
-                with open(self.filename, 'r', encoding='utf-8') as f:
+                with open(filename, 'r', encoding='utf-8') as f:
                     data = json.load(f)
+                
                 for item in data:
-                    self.cars.append(Car.from_dict(item))
-                    self.body_types.add(item['body_type'])
-                    self.brands.add(item['brand'])
-                print(f"Загружено {len(self.cars)} автомобилей из {self.filename}")
-            except Exception as e:
+                    try: 
+                        car = Car(
+                            brand=item['brand'],
+                            model=item['model'],
+                            year=item['year'],
+                            body_type=item['body_type'],
+                            mileage=item['mileage'],
+                            price=item['price']
+                        )
+                    
+                        Car.up_count()
+
+                        self.cars.append(car)
+                    
+                        self.body_types.add(item['body_type'])
+                    
+                        self.brands.add(item['brand'])
+                    
+                    except Exception as e:
+                        print(f"Ошибка: {e}")
+
+                print(f"Загружено {len(self.cars)} автомобилей из {filename}")
+
+            except Exception as e:      
                 print(f"Ошибка загрузки файла: {e}")
+        
         else:
             print("Файл базы данных не найден")
     
@@ -135,11 +238,11 @@ class AutoDealer:
         
         print(f"Количество автомобилей: {len(cars)}")
         print("-" * 80)
-        print(f"{'№':<3} | {'Марка':<12} | {'Модель':<12} | {'Год':<6} | {'Тип кузова':<12} | {'Пробег':<10} | {'Цена':<12}")
+        print(f"{'ID':<3} | {'Марка':<12} | {'Модель':<12} | {'Год':<6} | {'Тип кузова':<12} | {'Пробег':<10} | {'Цена':<12}")
         print("-" * 80)
         
         for i, car in enumerate(cars, 1):
-            print(f"{i:<3} | {car.brand:<12} | {car.model:<12} | {car.year:<6} | "
+            print(f"{car.id:<3} | {car.brand:<12} | {car.model:<12} | {car.year:<6} | "
                   f"{car.body_type:<12} | {car.mileage:<10,} | {car.price:<12,.0f}")
         print("-" * 80)
     
