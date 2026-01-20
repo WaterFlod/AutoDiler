@@ -8,6 +8,7 @@ class Car:
     MIN_YEAR = 1900
     MIN_PRICE = 0
     MIN_MILEAGE = 0
+    COUNT = 0
 
     def __init__(self, brand: str, model: str, year: int, body_type: str, mileage: int, price: float):
         self._validate_brand(brand)
@@ -17,6 +18,7 @@ class Car:
         self._validate_price(price)
         self._validate_mileage(mileage)
         
+        self.id = self.COUNT + 1
         self.brand = brand
         self.model = model
         self.year = year
@@ -96,14 +98,10 @@ class Car:
         }
     
     @classmethod
-    def from_dict(cls, data: dict):
-        """Создание объекта из словаря"""
-        return cls(
-            brand=data['brand'],
-            model=data['model'],
-            year=data['year'],
-            body_type=data['body_type'],
-            mileage=data['mileage'],
-            price=data['price']
-        )
+    def up_count(cls):
+        cls.COUNT += 1
+
+    @classmethod
+    def down_count(cls):
+        cls.COUNT -= 1    
     
