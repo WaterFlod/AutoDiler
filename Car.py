@@ -1,4 +1,6 @@
-from CarException import *
+from CarException import (InvalidYearError, InvalidBodyTypeError,
+                          InvalidBrandError, InvalidMileageError,
+                          InvalidPriceError)
 
 class Car:
     """Класс для представления автомобиля"""
@@ -11,6 +13,7 @@ class Car:
         self._validate_brand(brand)
         self._validate_body_type(body_type)
         self._validate_year(year)
+        self._validate_model(model)
         self._validate_price(price)
         self._validate_mileage(mileage)
         
@@ -28,9 +31,15 @@ class Car:
                                     "Марка автомобиля должна быть указана")
     
     def _validate_body_type(self, body_type):
-        """Проверка тип кузова автомобиля"""
+        """Проверка типа кузова автомобиля"""
         if not body_type:
             raise InvalidBodyTypeError(body_type, 
+                                       "Тип кузова автомобиля должен быть указан")
+    
+    def _validate_model(self, model):
+        """Проверка модели автомобиля"""
+        if not model:
+            raise InvalidBodyTypeError(model, 
                                        "Тип кузова автомобиля должен быть указан")
     
     def _validate_year(self, year: int):
@@ -61,11 +70,11 @@ class Car:
     
     def _validate_mileage(self, mileage: int):
         """Проверка пробега"""
-        if not mileage:
+        if mileage == None:
             raise InvalidMileageError(mileage, 
                                       "Пробег автомобиля должен быть указан")
 
-        if mileage < self.MIN_MILEAGE:
+        if mileage <= self.MIN_MILEAGE:
             raise InvalidMileageError(mileage,
                 f"Пробег {mileage} не может быть отрицательным")    
 
